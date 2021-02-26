@@ -77,13 +77,13 @@ func (t *Table) renderColumn(out *strings.Builder, row rowStr, colIdx int, maxCo
 
 	// if horizontal cell merges are enabled, look ahead and see how many cells
 	// have the same content and merge them all until a cell with a different
-	// content is found; override alignment to Center in this case
+	// content is found; override default alignment to Center in this case
 	if t.getRowConfig(hint).AutoMerge && !hint.isSeparatorRow {
 		for idx := colIdx + 1; idx < len(row); idx++ {
 			if row[colIdx] != row[idx] {
 				break
 			}
-			align = text.AlignCenter
+			align = t.getRowConfig(hint).getAlignAutoMerge()
 			maxColumnLength += t.maxColumnLengths[idx] + t.calcMergedColumnExtraWidth()
 			numColumnsRenderer++
 		}

@@ -347,6 +347,50 @@ func TestTable_Render_AutoMerge_WithHiddenRows(t *testing.T) {
 	assert.Equal(t, expectedOut, tw.Render())
 }
 
+func TestTable_Render_AutoMerge_RowAlign(t *testing.T) {
+	tw := NewWriter()
+	tw.AppendHeader(Row{"Node IP", "Pods", "Namespace", "Container", "RCE", "RCE"}, RowConfig{AutoMerge: true})
+	tw.AppendHeader(Row{"", "", "", "", "EXE", "RUN"})
+	tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 1", "LEFT", "LEFT"}, RowConfig{AutoMerge: true, AlignAutoMerge: text.AlignLeft})
+	tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 2", "Y", "N"})
+	tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1B", "C 3", "N", "N"})
+	tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 4", "RIGHT", "RIGHT"}, RowConfig{AutoMerge: true, AlignAutoMerge: text.AlignRight})
+	tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 5", "Y", "N"})
+	tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 6", "CENTER", "CENTER"}, RowConfig{AutoMerge: true, AlignAutoMerge: text.AlignCenter})
+	tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 7", "DEFAULT", "DEFAULT"}, RowConfig{AutoMerge: true})
+	tw.AppendFooter(Row{"", "", "", 7, 5, 3})
+	tw.SetAutoIndex(true)
+	tw.SetColumnConfigs([]ColumnConfig{
+		{Number: 5, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter},
+		{Number: 6, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter},
+	})
+	tw.SetStyle(StyleLight)
+	tw.Style().Options.SeparateRows = true
+
+	expectedOut := `┌───┬─────────┬────────┬───────────┬───────────┬───────────┐
+│   │ NODE IP │ PODS   │ NAMESPACE │ CONTAINER │    RCE    │
+│   ├─────────┼────────┼───────────┼───────────┼─────┬─────┤
+│   │         │        │           │           │ EXE │ RUN │
+├───┼─────────┼────────┼───────────┼───────────┼─────┴─────┤
+│ 1 │ 1.1.1.1 │ Pod 1A │ NS 1A     │ C 1       │ LEFT      │
+├───┼─────────┼────────┼───────────┼───────────┼─────┬─────┤
+│ 2 │ 1.1.1.1 │ Pod 1A │ NS 1A     │ C 2       │  Y  │  N  │
+├───┼─────────┼────────┼───────────┼───────────┼─────┼─────┤
+│ 3 │ 1.1.1.1 │ Pod 1A │ NS 1B     │ C 3       │  N  │  N  │
+├───┼─────────┼────────┼───────────┼───────────┼─────┴─────┤
+│ 4 │ 1.1.1.1 │ Pod 1B │ NS 2      │ C 4       │     RIGHT │
+├───┼─────────┼────────┼───────────┼───────────┼─────┬─────┤
+│ 5 │ 1.1.1.1 │ Pod 1B │ NS 2      │ C 5       │  Y  │  N  │
+├───┼─────────┼────────┼───────────┼───────────┼─────┴─────┤
+│ 6 │ 2.2.2.2 │ Pod 2  │ NS 3      │ C 6       │   CENTER  │
+├───┼─────────┼────────┼───────────┼───────────┼───────────┤
+│ 7 │ 2.2.2.2 │ Pod 2  │ NS 3      │ C 7       │  DEFAULT  │
+├───┼─────────┼────────┼───────────┼───────────┼─────┬─────┤
+│   │         │        │           │ 7         │  5  │  3  │
+└───┴─────────┴────────┴───────────┴───────────┴─────┴─────┘`
+	assert.Equal(t, expectedOut, tw.Render())
+}
+
 func TestTable_Render_BorderAndSeparators(t *testing.T) {
 	table := Table{}
 	table.AppendHeader(testHeader)
