@@ -3,6 +3,7 @@ package table
 import (
 	"fmt"
 	"io"
+	"math"
 	"strings"
 
 	"github.com/jedib0t/go-pretty/v6/text"
@@ -601,13 +602,28 @@ func (t *Table) initForRenderColumnConfigs() {
 }
 
 func (t *Table) initForRenderColumnLengths() {
-	var findMaxColumnLengths = func(rows []rowStr) {
-		for _, row := range rows {
-			for colIdx, colStr := range row {
-				longestLineLen := text.LongestLineLen(colStr)
-				if longestLineLen > t.maxColumnLengths[colIdx] {
-					t.maxColumnLengths[colIdx] = longestLineLen
+	findMaxColumnLengths := func(rows []rowStr) {
+		for rowIdx, row := range rows {
+			colIdx := 0
+			for colIdx < len(row) {
+				colStr := row[colIdx]
+				colSpan := 1
+				colLineLen := text.LongestLineLen(colStr)
+				if t.getRowConfig(renderHint{rowNumber: rowIdx + 1}).AutoMerge {
+					for idx := colIdx + 1; idx < len(row); idx++ {
+						if row[idx] != colStr {
+							break
+						}
+						colSpan++
+					}
+					colLineLen = t.calcMergedColumnLength(colLineLen, colSpan)
 				}
+				for idx := colIdx; idx < colIdx+colSpan; idx++ {
+					if colLineLen > t.maxColumnLengths[idx] {
+						t.maxColumnLengths[idx] = colLineLen
+					}
+				}
+				colIdx += colSpan
 			}
 		}
 	}
@@ -818,6 +834,19 @@ func (t *Table) reset() {
 	t.rows = nil
 	t.rowsFooter = nil
 	t.rowsHeader = nil
+}
+
+func (t *Table) calcMergedColumnLength(colLineLen int, colSpan int) int {
+	extraWidth := (colSpan - 1) * t.calcMergedColumnExtraWidth()
+	return int(math.Ceil(float64(colLineLen-extraWidth) / float64(colSpan)))
+}
+
+func (t *Table) calcMergedColumnExtraWidth() int {
+	w := text.RuneCount(t.style.Box.PaddingRight + t.style.Box.PaddingLeft)
+	if t.style.Options.SeparateColumns {
+		w += text.RuneCount(t.style.Box.MiddleSeparator)
+	}
+	return w
 }
 
 func (t *Table) shouldMergeCellsHorizontallyAbove(row rowStr, colIdx int, hint renderHint) bool {

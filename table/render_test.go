@@ -115,7 +115,7 @@ func TestTable_Render_AutoMerge(t *testing.T) {
 	tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 4", "N", "N"}, rowConfigAutoMerge)
 	tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 5", "Y", "N"}, rowConfigAutoMerge)
 	tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 6", "Y", "Y"}, rowConfigAutoMerge)
-	tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 7", "Y", "Y"}, rowConfigAutoMerge)
+	tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 7", "UNKNOWN", "UNKNOWN"}, rowConfigAutoMerge)
 	tw.AppendFooter(Row{"", "", "", 7, 5, 3})
 	tw.SetAutoIndex(true)
 	tw.SetColumnConfigs([]ColumnConfig{
@@ -146,7 +146,7 @@ func TestTable_Render_AutoMerge(t *testing.T) {
 ├───┼─────────┼────────┼───────────┼───────────┼─────┴─────┤
 │ 6 │ 2.2.2.2 │ Pod 2  │ NS 3      │ C 6       │     Y     │
 ├───┤         │        │           ├───────────┼───────────┤
-│ 7 │         │        │           │ C 7       │     Y     │
+│ 7 │         │        │           │ C 7       │  UNKNOWN  │
 ├───┼─────────┼────────┼───────────┼───────────┼─────┬─────┤
 │   │         │        │           │ 7         │  5  │  3  │
 └───┴─────────┴────────┴───────────┴───────────┴─────┴─────┘`
